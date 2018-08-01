@@ -1,0 +1,1 @@
+sensors -rw,soft,intr,rsize=8192,wsize=8192 192.168.0.12:/srv/dht
