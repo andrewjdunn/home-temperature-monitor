@@ -1,0 +1,56 @@
+
+
+/*
+
+---------------
+NAME
+---------------
+ TEMP oC(Big) (Red if warm / blue if cold / green if OK)
+ Humidity % (less big)
+----------------
+Lowest temp - (clock symbol) time
+Time too warm for (warning symbol)
+
+Highest temp - (clock symbol) time
+Time too cold for (warning symbol)
+*/
+
+
+.optional {
+    /*background: white;*/
+}
+
+/*.sensor {
+    border: 1px solid grey;
+    border-radius: 3px;
+    margin: 5px 5px 5px 0;
+    padding: 5px;
+    width: 5cm;
+    height: 5cm;
+    float: left;
+    background: lightskyblue;
+    overflow: hidden;
+}*/
+
+.sensorName {
+    /*font-size: 1.5vw;*/
+}
+
+.lowestTemperatureTime
+{
+    background: aliceblue;
+}
+
+.highestTemperatureTime
+{
+    background: pink;
+}
+.tooColdForInfo, .lowestTemperature
+{
+    color: blue;
+}
+
+.tooWarmForInfo, .highestTemperature
+{
+    color: red;
+}
