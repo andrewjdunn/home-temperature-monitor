@@ -1,3 +1,4 @@
+var sensorFiles = require('./sensorFiles');
 var sensors = require('./sensors');
 var oled = require('./oledDisplay');
 var oledContent = require('./oledContent');
@@ -10,8 +11,8 @@ var timesCurrentSensorUpdated = 0;
 var updateOled = function()
 {
     var latestReadings = sensors.getLatestReadings(currentSensor);
-    oled.showBitmap(oledContent.getOledImageData(sensors.getName(currentSensor), latestReadings));
-    var sensorCount = sensors.count();
+    oled.showBitmap(oledContent.getOledImageData(sensorFiles.getName(currentSensor), latestReadings));
+    var sensorCount = sensorFiles.count();
     ++timesCurrentSensorUpdated;
     if(timesCurrentSensorUpdated > numberOfTimesToUpdateCurrentSensor) {
         timesCurrentSensorUpdated = 0;
@@ -21,7 +22,6 @@ var updateOled = function()
         }
     }
 };
-
 
 exports.startOledUpdateTimer = function () {
     setInterval(updateOled, 5000);

@@ -1,84 +1,18 @@
 'use strict';
-// sensors... but vague - new files are being introduced to replace this file before itbecomes a monolith
-// I think this file should be sensor readings maybe? stuff to handle files and updates should be moved out
+
 // For sure instead of scanning the files every time this data is requested it should be held in memory and updated -
 // So each senors holds it's current temp and humidity and the high and low over the (whatever the current period is)
 // The low and high .. if the new temp just recorded is higher (or lower).. use that.. if the current low/high reading expires (older thean 24 hours or whatver) then scan?
 /// The trouble with the above is that even if nothing is watching - each time the extreme temp expires we scan again... maybe if the extreme expires - null it - and scan when requested?
 // Should be using objects,,, and prototypes maybe - I've never got much practive - might need to read up on prototypes etc..
-Can we commit stuff? its been a while
 
 var fs = require('fs');
+var sensorFiles = require('./sensorFiles');
 var sensorConfiguration = require('./sensorConfiguration');
 var timeUtility = require('./timeUtility');
 
-var sensorDirectorys = 0;
-const rootPath = "/srv/dht";
-
-var getLatestFileName = function(directoryName) {
-    var fileNames = fs.readdirSync(directoryName);
-    var latestFileName = "";
-    var latestTime = 0;
-    // TODO: there will be a better foreach to use
-    for(var i = 0; i< fileNames.length;i++) {
-        var fileName = fileNames[i];
-        var stat = fs.statSync(directoryName+"/"+fileName);
-        if(stat.isFile()) {
-
-            var fileDate = new Date(stat.mtime);
-            if (fileDate.getTime() > latestTime) {
-                latestTime = fileDate.getTime();
-                latestFileName = fileName;
-            }
-        }
-    }
-    return latestFileName;
-};
-
-var getFileNameForDate = function(directoryName, date) {
-    //DDMMYYYY.csv
-    return directoryName +"/" + date.getDate().toString().padStart(2,"0")+(date.getMonth()+1).toString().padStart(2,"0")+date.getFullYear().toString().padStart(2,"0")+".csv";
-};
-
-var getLatestValues = function(index) {
-    var directoryName = exports.getName(index);
-    var latestFile = getLatestFileName(rootPath+"/"+directoryName);
-    var stat = fs.statSync(rootPath+"/"+directoryName+"/"+latestFile);
-    var fd = fs.openSync(rootPath+"/"+directoryName+"/"+latestFile, "r");
-    // TODO: Assuming that lines are less that 200 bytes.. should be:)
-    var buffer = Buffer.alloc(201);
-    fs.readSync(fd,buffer, 0, 200, stat.size - 200);
-    fs.closeSync(fd);
-
-    var lines = buffer.toString().split('\n');
-    var lastLine = lines[lines.length-2];
-
-    // TODO: Should I close the files??
-    var values = lastLine.split(',');
-    var readings = {};
-    readings.readingTime = values[0];
-    readings.fileDate = new Date(stat.mtime);
-    readings.index = index;
-    readings.temperature = values[2];
-    readings.humidity = values[1];
-    return readings;
-};
-
-
-fs.readdir(rootPath, function(err,items) {
-    sensorDirectorys = items;
-});
-
-exports.count =  function() {
-	return sensorDirectorys.length;
-};
-
-exports.getName = function(index) {
-    return sensorDirectorys[index];
-};
-
 exports.getLatestReadings = function(index) {
-    var readings = getLatestValues(index);
+    var readings = sensorFiles.getLatestValues(index);
     var fileDate = readings.fileDate;
     var readingTimeParts = readings.readingTime.split(':');
 
@@ -133,7 +67,7 @@ exports.getExtremeTemperatures = function(index, timePeriod) {
             break;
     }
     var startDate = new Date(nowDate.getTime() - milliSecondsToStart);
-    var directoryName = exports.getName(index);
+    var directoryName = sensorFiles.getName(index);
     var currentDate = new Date(startDate);
 
     var bufferSize = 1024  * 10;
@@ -144,7 +78,7 @@ exports.getExtremeTemperatures = function(index, timePeriod) {
 
     do {
 
-        var fileForCurrentDate = getFileNameForDate(rootPath+"/"+directoryName, currentDate);
+        var fileForCurrentDate = sensorFiles.getFileNameForDate("/"+directoryName, currentDate);
 
         // Get the min temp from fileForCurrentDate (if currentTDate == NowTime - stop at the time not the whole day)
         if(fs.existsSync(fileForCurrentDate)) {
@@ -239,11 +173,6 @@ exports.getExtremeTemperatures = function(index, timePeriod) {
     {
         extremeTemperatures.tooColdForTime = timeUtility.millisecondsToTimeString(extremeTemperatures.tooColdForTime);
     }
-
-
-
-
     return extremeTemperatures;
-
 };
 

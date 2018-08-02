@@ -1,4 +1,5 @@
 // The job of this script is to monitor each of the current sensor files for changes - looking for new readings
+var sensorFiles = require('./sensorFiles');
 var sensors = require('./sensors');
 
 var latestReadingsTimout = null;
@@ -7,7 +8,7 @@ var io;
 
 
 var updateLatestReadings = function() {
-    var sensorCount = sensors.count();
+    var sensorCount = sensorFiles.count();
     for(var index = 0;index <sensorCount;index++){
         var latestReadings = sensors.getLatestReadings(index);
         io.emit('updateLatestReadings', {
@@ -17,7 +18,7 @@ var updateLatestReadings = function() {
 };
 
 var updateStats = function() {
-    var sensorCount = sensors.count();
+    var sensorCount = sensorFiles.count();
     for(var index = 0;index <sensorCount;index++){
         var stats = sensors.getExtremeTemperatures(index, sensors.TimePeriod.Day);
         io.emit('updateStats', {
@@ -49,11 +50,11 @@ exports.watchForSensorDataChanges = function(theSingleIo, clientSocket){
     }
 
     // Send the names now
-    var sensorCount = sensors.count();
+    var sensorCount = sensorFiles.count();
     var allNames = {};
     allNames.sensorCount = sensorCount;
     for(var index = 0;index <sensorCount;index++){
-        allNames[index] = sensors.getName(index);
+        allNames[index] = sensorFiles.getName(index);
     }
     clientSocket.emit('updateName', {
         message: allNames

@@ -1,6 +1,6 @@
 // Generates HTML showing the temperatures of all connected sensors
 
-var sensors = require('./sensors');
+var sensorFiles = require('./sensorFiles');
 fs = require("fs");
 
 var getSensorOverviewTableRow = function(i) {
@@ -10,7 +10,7 @@ var getSensorOverviewTableRow = function(i) {
 
 exports.getSensorOverviewTableRows = function() {
 
-    var sensorCount = sensors.count();
+    var sensorCount = sensorFiles.count();
     var tableRows = "";
     for (var i = 0; i < sensorCount; i++) {
         tableRows = tableRows.concat(getSensorOverviewTableRow(i));
